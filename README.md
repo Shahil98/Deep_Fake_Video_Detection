@@ -11,6 +11,7 @@ cropped image by ensembling ResNext and EfficientNetB6**
 
 1) Clone this repository.
 ```
+https://github.com/Shahil98/Deep_Fake_Video_Detection.git
 ```
 
 2) In the repository, execute `pip install -r requirements.txt` to install all the necessary libraries.
