@@ -24,4 +24,4 @@ https://github.com/Shahil98/Deep_Fake_Video_Detection.git
 4) Download the pretrained weights.
 	1) YOLO Face model [pretrained weights](https://drive.google.com/open?id=1PAdOJX1aMm-53bTdrCyUpFF_voZxQ4O_/view?usp=sharing) and save it in /model_data/
 	2) ResNext:- [pretrained weights](https://drive.google.com/open?id=1PC0PAQNTbDVIOBkZ_qkCTpEj9lgVK-jI/view?usp=sharing) and save it in the root directory 
-	3) EfficientNetB6(With Attention)[pretrained weight](https://drive.google.com/open?id=1fwGpRb5oWM8zjzxyBljLv7cVPczUhEzh/view?usp=sharing) and save it in the root directory
+	3) EfficientNetB6(With Attention)[pretrained weight](https://drive.google.com/open?id=1fwGpRb5oWM8zjzxyBljLv7cVPczUhEzh) and save it in the root directory
