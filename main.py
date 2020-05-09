@@ -584,12 +584,12 @@ if __name__ == "__main__":
     Result = results()
 
     
-    video_directory = "/media/kenil/Kenil/Users/Kenil/Downloads/Final_Project/test_videos"
+    video_directory = "test_videos"
     #Result = results()
     face_crop_object = GenerateFaceCrops(video_directory, frames_per_video)
     face_crop_object.face_crops()
     
-    image_directory = "/media/kenil/Kenil/Users/Kenil/Downloads/Final_Project/Main/FaceCrops"
+    image_directory = "FaceCrops"
 
     resnext = RunResNext(image_directory , frames_per_video)
     scores1 = resnext.predict()
