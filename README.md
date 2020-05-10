@@ -25,3 +25,11 @@ https://github.com/Shahil98/Deep_Fake_Video_Detection.git
 	1) YOLO Face model [pretrained weights](https://drive.google.com/open?id=1PAdOJX1aMm-53bTdrCyUpFF_voZxQ4O_) and save it in /model_data/
 	2) ResNext:- [pretrained weights](https://drive.google.com/open?id=1PC0PAQNTbDVIOBkZ_qkCTpEj9lgVK-jI) and save it in the root directory 
 	3) EfficientNetB6(With Attention)[pretrained weight](https://drive.google.com/open?id=1fwGpRb5oWM8zjzxyBljLv7cVPczUhEzh) and save it in the root directory
+ 
+ 5) The data used to train and test the system can be obtained from following link.
+ ```
+ https://www.kaggle.com/c/deepfake-detection-challenge/data
+ ```
+ 
+ 6) To test the system create a 'test_videos' directory and put the test video inside this folder. Than execute ```python main.py```
+ 
