@@ -31,5 +31,5 @@ https://github.com/Shahil98/Deep_Fake_Video_Detection.git
  https://www.kaggle.com/c/deepfake-detection-challenge/data
  ```
  
- 6) To test the system create a 'test_videos' directory and put the test video inside this folder. Than execute ```python main.py```
+ 6) To test the system create a 'test_videos' directory and put the test videos inside this folder. Then execute ```python main.py```
  
