@@ -606,13 +606,13 @@ if __name__ == "__main__":
 
     print("************************************************")
     print("EfficientNet Attention Results")
-    Result.find_best_threshold(scores4  )
-    Result.generate_report(scores4, 0.5)
+    Result.find_best_threshold(scores2  )
+    Result.generate_report(scores2, 0.5)
     print("************************************************")
 
     print("************************************************")
     print("EfficientNet Attention + ResNext Ensemble Results")
-    ensembled = Result.ensemble(scores4, scores1)
+    ensembled = Result.ensemble(scores2, scores1)
     Result.find_best_threshold(ensembled)
     Result.generate_report(ensembled, 0.5)
     print("************************************************")
