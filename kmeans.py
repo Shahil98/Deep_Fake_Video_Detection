@@ -76,8 +76,10 @@ class YOLO_Kmeans:
             infos = line.split(" ")
             length = len(infos)
             for i in range(1, length):
-                width = int(infos[i].split(",")[2]) - int(infos[i].split(",")[0])
-                height = int(infos[i].split(",")[3]) - int(infos[i].split(",")[1])
+                width = (int(infos[i].split(",")[2])
+                         - int(infos[i].split(",")[0]))
+                height = (int(infos[i].split(",")[3])
+                          - int(infos[i].split(",")[1]))
                 dataSet.append([width, height])
         result = np.array(dataSet)
         f.close()
@@ -89,7 +91,8 @@ class YOLO_Kmeans:
         result = result[np.lexsort(result.T[0, None])]
         self.result2txt(result)
         print("K anchors:\n {}".format(result))
-        print("Accuracy: {:.2f}%".format(self.avg_iou(all_boxes, result) * 100))
+        print("Accuracy: {:.2f}%".format(
+            self.avg_iou(all_boxes, result) * 100))
 
 
 if __name__ == "__main__":

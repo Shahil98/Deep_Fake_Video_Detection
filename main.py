@@ -2,16 +2,13 @@ import colorsys
 import cv2
 import numpy as np
 from keras import backend as K
-from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
-from keras.models import load_model, Model, Sequential
+from keras.models import load_model, Model
 from keras.layers import (
     Input,
     Dropout,
-    Flatten,
     Dense,
     Conv2D,
-    MaxPool2D,
     GlobalMaxPooling2D,
     Activation,
     GlobalAveragePooling2D,
@@ -92,14 +89,16 @@ class YOLO(object):
 
     def generate(self):
         model_path = os.path.expanduser(self.model_path)
-        assert model_path.endswith(".h5"), "Keras model or weights must be a .h5 file."
+        assert model_path.endswith(".h5"), (
+                "Keras model or weights must be a .h5 file.")
         # Load model, or construct model and load weights.
         num_anchors = len(self.anchors)
         num_classes = len(self.class_names)
         is_tiny_version = num_anchors == 6  # default setting
         try:
             self.yolo_model = load_model(model_path, compile=False)
-        except:
+        except Exception as e:
+            print("Exception occured ", e, "as normal model did not load")
             self.yolo_model = (
                 tiny_yolo_body(
                     Input(shape=(None, None, 3)), num_anchors // 2, num_classes
@@ -113,14 +112,16 @@ class YOLO(object):
                 self.model_path
             )  # make sure model, anchors and classes match
         else:
-            assert self.yolo_model.layers[-1].output_shape[-1] == num_anchors / len(
+            assert (self.yolo_model.layers[-1].output_shape[-1] ==
+                    num_anchors / len(
                 self.yolo_model.output
             ) * (
                 num_classes + 5
-            ), "Mismatch between model and given anchor and class sizes"
+            )), "Mismatch between model and given anchor and class sizes"
 
         hsv_tuples = [
-            (x / len(self.class_names), 1.0, 1.0) for x in range(len(self.class_names))
+            ((x / len(self.class_names), 1.0, 1.0) for x in
+                range(len(self.class_names)))
         ]
         self.colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
         self.colors = list(
@@ -138,7 +139,8 @@ class YOLO(object):
         # Generate output tensor targets for filtered bounding boxes.
         self.input_image_shape = K.placeholder(shape=(2,))
         if self.gpu_num >= 2:
-            self.yolo_model = multi_gpu_model(self.yolo_model, gpus=self.gpu_num)
+            self.yolo_model = (multi_gpu_model(self.yolo_model,
+                                               gpus=self.gpu_num))
         boxes, scores, classes = yolo_eval(
             self.yolo_model.output,
             self.anchors,
@@ -151,9 +153,12 @@ class YOLO(object):
 
     def detect_image(self, image):
         if self.model_image_size != (None, None):
-            assert self.model_image_size[0] % 32 == 0, "Multiples of 32 required"
-            assert self.model_image_size[1] % 32 == 0, "Multiples of 32 required"
-            boxed_image = letterbox_image(image, tuple(reversed(self.model_image_size)))
+            assert self.model_image_size[0] % 32 == 0, (
+                "Multiples of 32 required")
+            assert self.model_image_size[1] % 32 == 0, (
+                "Multiples of 32 required")
+            boxed_image = letterbox_image(
+                image, tuple(reversed(self.model_image_size)))
         else:
             new_image_size = (
                 image.width - (image.width % 32),
@@ -229,7 +234,8 @@ class GenerateFaceCrops:
                 ret, frame = vid.read()
                 person_boxes = yolo_object.detect_video(frame)
                 for i in range(0, len(person_boxes)):
-                    os.mkdir("FaceCrops/" + video_name + "/" + "Person" + str(i + 1))
+                    os.mkdir("FaceCrops/" +
+                             video_name + "/" + "Person" + str(i + 1))
                 person_no = 1
                 for bbox in person_boxes:
                     x, y, w, h = (
@@ -238,7 +244,7 @@ class GenerateFaceCrops:
                         int(bbox[3] - bbox[2]),
                         int(bbox[1] - bbox[0]),
                     )
-                    img = frame[y : y + h, x : x + w]
+                    img = frame[y: y + h, x: x + w]
                     cv2.imwrite(
                         "FaceCrops/"
                         + video_name
@@ -261,11 +267,13 @@ class GenerateFaceCrops:
                         int(bbox[1] - bbox[0]),
                     )
                     bbox = [x, y, w, h]
-                    multiTracker.add(cv2.TrackerKCF_create(), frame, tuple(bbox))
+                    multiTracker.add(cv2.TrackerKCF_create(),
+                                     frame, tuple(bbox))
                 frame_number = 1
                 total_frames = 1
                 while vid.isOpened():
-                    skip_rate = vid.get(cv2.CAP_PROP_FRAME_COUNT) // self.sample_rate
+                    skip_rate = (vid.get(cv2.CAP_PROP_FRAME_COUNT) //
+                                 self.sample_rate)
                     ret, frame = vid.read()
                     if not ret:
                         break
@@ -279,7 +287,7 @@ class GenerateFaceCrops:
                     person_no = 1
                     for i, newbox in enumerate(boxes):
                         x, y, w, h = newbox
-                        img = frame[int(y) : int(y + h), int(x) : int(x + w)]
+                        img = frame[int(y): int(y + h), int(x): int(x + w)]
                         cv2.imwrite(
                             "FaceCrops/"
                             + video_name
@@ -313,7 +321,8 @@ class Utils:
     Resize the face image as per the input size of the inception model.
     Input :
            img :- Face Crops generated from the main frame of the video.
-           size :- Width/Height of the image. (Image is supposed to be a square)
+           size :- Width/Height of the image.
+                   (Image is supposed to be a square)
     Returns :
             resized :- Resized image with it's higher dimension equal to size.
     """
@@ -334,28 +343,30 @@ class Utils:
     Function :- make_square_image
     Add borders to the image in order to change the shape of image to a square.
     Input :
-           img :- Resized face crops from the isotropically_resize_image function.
+           img :- Resized face crops from the
+                  isotropically_resize_image function.
     Returns :
-            square_image :- Square image with a border of height (size-h) and width (size-w). 
+            square_image :- Square image with a border
+                            of height (size-h) and width (size-w).
     """
 
     def make_square_image(self, img):
         h, w = img.shape[:2]
         size = max(h, w)
-        t = 0
         b = size - h
-        l = 0
         r = size - w
-        return cv2.copyMakeBorder(img, t, b, l, r, cv2.BORDER_CONSTANT, value=0)
+        return cv2.copyMakeBorder(
+            img, 0, b, 0, r, cv2.BORDER_CONSTANT, value=0)
 
     """
     Function :- find_number_of_person
-    Return the number of person id found after completion of detection and tracking algotihms.
+    Return the number of person id found after
+    completion of detection and tracking algotihms.
     Input :
-           video_face_path :- Path of the folder of a specific video where different person 
-                              ID are stored.
+           video_face_path :- Path of the folder of a specific
+           video where different person ID are stored.
     Returns :
-            arr :- Number of different people in the entire video. 
+            arr :- Number of different people in the entire video.
     """
 
     def find_number_of_person(self, video_face_path):
@@ -377,7 +388,8 @@ class Utils:
                 files = mypath + "/" + f
                 img = cv2.imread(files)
                 frame = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                resized_face = self.isotropically_resize_image(frame, self.input_size)
+                resized_face = self.isotropically_resize_image(frame,
+                                                               self.input_size)
                 resized_face = self.make_square_image(resized_face)
                 x[n] = resized_face
                 n += 1
@@ -432,16 +444,21 @@ class results:
 
     """
     Function :- generate_report
-    This function is called in the after the predicted scores of every video in the directory has been
-    generated. It is mainly used to generate confusion matrix, classification report and accuracy.
+    This function is called in the after the predicted
+    scores of every video in the directory has been
+    generated. It is mainly used to generate confusion
+    matrix, classification report and accuracy.
     Input :
-            probability_scores :- Dictionary with video names as their keys and there predicted 
-                                  probability score as the value of that specific key.
-            threshold :- Real value in between 0 and 1. If probability is more than threshold, then 
-                         we will consider video as fake.
+            probability_scores :- Dictionary with video names as their
+                                  keys and there predicted probability score
+                                  as the value of that specific key.
+            threshold :- Real value in between 0 and 1.
+                         If probability is more than threshold,
+                         then we will consider video as fake.
     Returns :
-            probability_scores :- Dictionary with video names as their keys and there predicted 
-            probability score as the value of that specific key.  
+            probability_scores :- Dictionary with video names as their
+            keys and there predicted probability score as the
+            value of that specific key.
     """
 
     def generate_report(self, probability_scores, threshold):
@@ -465,17 +482,8 @@ class results:
     def ensemble(self, scores_resnext, scores_efficient):
         ensembled = {}
         for keys in scores_resnext.keys():
-            ensembled[keys] = 0.4 * scores_efficient[keys] + 0.6 * scores_resnext[keys]
-        return ensembled
-
-    def ensemble3(self, scores_resnext, scores_xception, scores_efficient):
-        ensembled = {}
-        for keys in scores_resnext.keys():
-            ensembled[keys] = (
-                0.3 * scores_efficient[keys]
-                + 0.2 * scores_xception[keys]
-                + 0.5 * scores_resnext[keys]
-            )
+            ensembled[keys] = (0.4 * scores_efficient[keys] +
+                               0.6 * scores_resnext[keys])
         return ensembled
 
     def dump_json(self, file_name, dictionary):
@@ -519,7 +527,8 @@ class RunClassifier1:
             metrics=["accuracy"],
         )
         model.load_weights("Xception_DeepFakeFull.h5")
-        test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
+        test_datagen = image.ImageDataGenerator(
+            preprocessing_function=preprocess_input)
         return model, test_datagen
 
     def load_model_efficient(self):
@@ -542,7 +551,7 @@ class RunClassifier1:
             metrics=["accuracy"],
         )
         model.load_weights("EFB5DeepFakes.h5")
-        test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+        test_datagen = image.ImageDataGenerator(rescale=1.0 / 255)
         return model, test_datagen
 
     def load_efficient_attention(self):
@@ -556,13 +565,16 @@ class RunClassifier1:
         pt_features = base_model(in_lay)
         bn_features = BatchNormalization()(pt_features)
         # here we do an attention mechanism to turn pixels in the GAP on an off
-        attn_layer = Conv2D(64, kernel_size=(1, 1), padding="same", activation="relu")(
+        attn_layer = Conv2D(64, kernel_size=(1, 1),
+                            padding="same", activation="relu")(
             Dropout(0.5)(bn_features)
         )
-        attn_layer = Conv2D(16, kernel_size=(1, 1), padding="same", activation="relu")(
+        attn_layer = Conv2D(16, kernel_size=(1, 1),
+                            padding="same", activation="relu")(
             attn_layer
         )
-        attn_layer = Conv2D(8, kernel_size=(1, 1), padding="same", activation="relu")(
+        attn_layer = Conv2D(8, kernel_size=(1, 1),
+                            padding="same", activation="relu")(
             attn_layer
         )
         attn_layer = Conv2D(
@@ -585,7 +597,8 @@ class RunClassifier1:
         gap_features = GlobalAveragePooling2D()(mask_features)
         gap_mask = GlobalAveragePooling2D()(attn_layer)
         # to account for missing values from the attention model
-        gap = Lambda(lambda x: x[0] / x[1], name="RescaleGAP")([gap_features, gap_mask])
+        gap = Lambda(lambda x: x[0] / x[1],
+                     name="RescaleGAP")([gap_features, gap_mask])
         gap_dr = Dropout(0.25)(gap)
         dr_steps = Dropout(0.25)(Dense(128, activation="relu")(gap_dr))
         out_layer = Dense(1, activation="sigmoid")(dr_steps)
@@ -597,7 +610,7 @@ class RunClassifier1:
         )
         model.load_weights("EFB6withAttentionDeepFakes.h5")
         model.summary()
-        test_datagen = ImageDataGenerator(rescale=1.0 / 255)
+        test_datagen = image.ImageDataGenerator(rescale=1.0 / 255)
         return model, test_datagen
 
     def predict(self):
@@ -627,13 +640,14 @@ class RunClassifier1:
             y_person = []
             for i in range(person_count):
                 y_person.append(
-                    predictions[i * per_person : i * per_person + per_person]
+                    predictions[i * per_person: i * per_person + per_person]
                     .mean()
                     .item()
                 )
             probability_scores[video] = max(y_person)
             end = time.time()
-            print(video, ":-", probability_scores[video], "Time Taken :-", end - start)
+            print(video, ":-", probability_scores[video],
+                  "Time Taken :-", end - start)
 
         return probability_scores
 
@@ -650,7 +664,8 @@ class RunResNext:
 
     """
     Function :- load_model
-    This function is called in the when the object of RunResNext is created. Inception ResNet model is
+    This function is called in the when the object
+    of RunResNext is created. Inception ResNet model is
     loaded using the function.
     Input :
            None
@@ -668,13 +683,15 @@ class RunResNext:
 
     """
     Function :- predict
-    This function is called in the after the model has been loaded. It is used predict the probability
+    This function is called in the after the model
+    has been loaded. It is used predict the probability
     score of each video present in the self.video_directory_path.
     Input :
            None
     Returns :
-            probability_scores :- Dictionary with video names as their keys and there predicted 
-                                  probability score as the value of that specific key.  
+            probability_scores:- Dictionary with video names as their keys and
+                                 there predicted probability score as the value
+                                 of that specific key.
     """
 
     def predict(self):
@@ -693,7 +710,8 @@ class RunResNext:
                 with torch.no_grad():
                     y_pred = self.model(x)
                     y_pred = torch.sigmoid(y_pred.squeeze())
-                    y_person.append(y_pred[: self.frames_per_video].mean().item())
+                    y_person.append(
+                        y_pred[: self.frames_per_video].mean().item())
             probability_scores[video] = max(y_person)
             print(video, ":-", probability_scores[video])
         return probability_scores

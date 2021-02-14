@@ -53,7 +53,8 @@ def get_random_data(
     image = Image.open(line[0])
     iw, ih = image.size
     h, w = input_shape
-    box = np.array([np.array(list(map(int, box.split(",")))) for box in line[1:]])
+    box = np.array([np.array(list(map(int,
+                                      box.split(",")))) for box in line[1:]])
 
     if not random:
         # resize image
@@ -82,7 +83,8 @@ def get_random_data(
         return image_data, box_data
 
     # resize image
-    new_ar = w / h * rand(1 - jitter, 1 + jitter) / rand(1 - jitter, 1 + jitter)
+    new_ar = (w / h * rand(1 - jitter, 1 + jitter) /
+              rand(1 - jitter, 1 + jitter))
     scale = rand(0.25, 2)
     if new_ar < 1:
         nh = int(scale * h)
