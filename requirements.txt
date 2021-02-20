@@ -1,6 +1,6 @@
 numpy==1.18.3
 torch==1.7.1
-tensorflow==1.8.0
+tensorflow
 torchvision
 opencv-contrib-python==4.2.0.34
 opencv-python==4.2.0.34
@@ -10,3 +10,4 @@ efficientnet==1.1.0
 h5py==2.10.0
 pytest
 pytest-flake8
+keras_applications
