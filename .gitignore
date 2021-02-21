@@ -3,3 +3,5 @@ __pycache__/
 .vscode/
 *.h5
 code/FaceCrops/
+code/Images/
+code/Videos/

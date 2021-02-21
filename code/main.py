@@ -12,7 +12,6 @@ from keras import (
 )
 from keras_applications.resnext import ResNeXt101
 import time
-from sklearn import metrics
 from efficientnet.keras import EfficientNetB6
 import json
 from faceCrops import GenerateFaceCrops
@@ -20,42 +19,15 @@ import argparse
 
 
 class Result:
-    """
-    Function :- generate_report
-    This function is called in the after the predicted
-    scores of every video in the directory has been
-    generated. It is mainly used to generate confusion
-    matrix, classification report and accuracy.
-    Input :
-            probability_scores :- Dictionary with video names as their
-                                  keys and there predicted probability score
-                                  as the value of that specific key.
-            threshold :- Real value in between 0 and 1.
-                         If probability is more than threshold,
-                         then we will consider video as fake.
-    Returns :
-            probability_scores :- Dictionary with video names as their
-            keys and there predicted probability score as the
-            value of that specific key.
-    """
-
-    def generate_report(self, probability_scores, threshold):
-        y_real = []
+    def generate_classifications(self, probability_scores, threshold):
         y_pred = []
-        y_prob = []
+
         for keys in probability_scores.keys():
-            label = int(keys.split("_")[-1])
-            y_real.append(label)
             if probability_scores[keys] > threshold:
                 y_pred.append(1)
             else:
                 y_pred.append(0)
-            y_prob.append(probability_scores[keys])
-
-        print(metrics.confusion_matrix(y_real, y_pred))
-        print(metrics.accuracy_score(y_real, y_pred))
-        print(metrics.classification_report(y_real, y_pred))
-        print("Log Loss value is :-", metrics.log_loss(y_real, y_prob))
+        return(y_pred)
 
     def ensemble(self, scores_resnext, scores_efficient):
         ensembled = {}
@@ -75,7 +47,7 @@ class Result:
 
 
 class ResNext:
-    def __load_model(self, learning_rate, trainable_layers):
+    def __load_model(self, learning_rate=0, trainable_layers=0):
         print("MODEL LOADING..........")
         in_lay = keras_layers.Input(shape=(224, 224, 3))
         base_model = model = ResNeXt101(
@@ -129,8 +101,8 @@ class ResNext:
 
         model.save_weights("Weights/ResnextDeepFakes.h5")
 
-    def predict(self, test_set_dir):
-        model = self.load_efficient_attention()
+    def __predict_images(self, test_set_dir):
+        model = self.__load_model()
         print("Model has been loaded")
         model.load_weights("Weights/ResnextDeepFakes.h5")
         test_datagen = image.ImageDataGenerator(rescale=1.0 / 255)
@@ -153,8 +125,13 @@ class ResNext:
             )
             test_generator.reset()
             predictions = model.predict_generator(
-                test_generator, steps=test_generator.samples // 10
+                test_generator, steps=test_generator.samples // 1
             )
+
+            for i in range(len(predictions)):
+                predictions[i] = np.array(predictions[i])
+            predictions = np.array(predictions)
+
             per_person = len(predictions) // person_count
             y_person = []
             for i in range(person_count):
@@ -172,9 +149,14 @@ class ResNext:
 
         return probability_scores
 
+    def predict_videos(self, test_set_dir, frames):
+        face_crop_object = GenerateFaceCrops(test_set_dir, frames)
+        face_crop_object.face_crops(test_set_dir+"/FaceCrops")
+        return(self.__predict_images(test_set_dir+"/FaceCrops"))
+
 
 class EfficientNetWithAttention:
-    def __load_model(self, learning_rate, trainable_layers):
+    def __load_model(self, learning_rate=0, trainable_layers=0):
         print("MODEL LOADING..........")
         in_lay = keras_layers.Input(shape=(224, 224, 3))
         base_model = EfficientNetB6(
@@ -258,8 +240,8 @@ class EfficientNetWithAttention:
 
         model.save_weights("Weights/EFB6withAttentionDeepFakes.h5")
 
-    def predict(self, test_set_dir):
-        model = self.load_efficient_attention()
+    def __predict_images(self, test_set_dir):
+        model = self.__load_model()
         print("Model has been loaded")
         model.load_weights("Weights/EFB6withAttentionDeepFakes.h5")
         test_datagen = image.ImageDataGenerator(rescale=1.0 / 255)
@@ -282,10 +264,15 @@ class EfficientNetWithAttention:
             )
             test_generator.reset()
             predictions = model.predict_generator(
-                test_generator, steps=test_generator.samples // 10
+                test_generator, steps=test_generator.samples // 1
             )
             per_person = len(predictions) // person_count
             y_person = []
+
+            for i in range(len(predictions)):
+                predictions[i] = np.array(predictions[i])
+            predictions = np.array(predictions)
+
             for i in range(person_count):
                 y_person.append(
                     predictions[i * per_person: i * per_person + per_person]
@@ -300,6 +287,11 @@ class EfficientNetWithAttention:
                   end - start)
 
         return probability_scores
+
+    def predict_videos(self, test_set_dir, frames):
+        face_crop_object = GenerateFaceCrops(test_set_dir, frames)
+        face_crop_object.face_crops(test_set_dir+"/FaceCrops")
+        return(self.__predict_images(test_set_dir+"/FaceCrops"))
 
 
 if __name__ == "__main__":
@@ -333,14 +325,15 @@ if __name__ == "__main__":
         face_crop_object.face_crops()
 
     elif args.trainResNext:
-        resnext = ResNext(
+        print(args)
+        resnext = ResNext()
+        resnext.train(
             args.imageDirectory,
             args.epochs,
             args.batchSize,
             args.learningRate,
-            args.trainableLayers,
+            args.trainableLayers
         )
-        resnext.train()
     elif args.trainEfficientNet:
         efficientnet_model_object = EfficientNetWithAttention()
         efficientnet_model_object.train(
@@ -348,21 +341,23 @@ if __name__ == "__main__":
             args.epochs,
             args.batchSize,
             args.learningRate,
-            args.trainableLayers,
+            args.trainableLayers
         )
     elif args.test:
         resnext_object = ResNext()
-        resnext_output = resnext_object.predict()
+        resnext_output = resnext_object.predict_videos(args.testVideoDirectory,
+                                                       args.frames)
 
-        efficientnet_object = EfficientNetWithAttention(
-                                                    args.testVideoDirectory)
-        efficientnet_output = efficientnet_object.predict(
-                                                    args.testVideoDirectory)
+        efficientnet_object = EfficientNetWithAttention()
+        efficientnet_output = efficientnet_object.predict_videos(
+                                                    args.testVideoDirectory,
+                                                    args.frames)
 
         result_object = Result()
         ensemble_scores = result_object.ensemble(resnext_output,
                                                  efficientnet_output)
-        result_object.generate_report(ensemble_scores, 0.5)
+        print("Class predictions: ",
+              result_object.generate_classifications(ensemble_scores, 0.5))
 
     else:
         print("Invalid arguments provided")

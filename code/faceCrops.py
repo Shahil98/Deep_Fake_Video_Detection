@@ -1,8 +1,7 @@
 from os import mkdir, listdir
-from os.path import isfile, join
+from os.path import isfile, join, isdir
 from yolo import YOLO
 import cv2
-from numba import cuda
 
 
 class GenerateFaceCrops:
@@ -10,9 +9,9 @@ class GenerateFaceCrops:
         self.video_directory = video_directory
         self.sample_rate = sample_rate
 
-    def face_crops(self):
+    def face_crops(self, directory="FaceCrops"):
         try:
-            mkdir("FaceCrops")
+            mkdir(directory)
         except Exception as e:
             print(e)
         videos = [
@@ -26,14 +25,25 @@ class GenerateFaceCrops:
             try:
                 video_path = self.video_directory + "/" + v
                 video_name = video_path.split("/")[-1].split(".")[0]
-                mkdir("FaceCrops/" + video_name)
-                print(video_name)
+                if not isdir("./"+directory + "/" + video_name):
+                    mkdir(directory + "/" + video_name)
                 vid = cv2.VideoCapture(video_path)
                 ret, frame = vid.read()
                 person_boxes = yolo_object.detect_video(frame)
                 for i in range(0, len(person_boxes)):
-                    mkdir("FaceCrops/" +
-                          video_name + "/" + "Person" + str(i + 1))
+                    if not isdir("./"
+                                 + directory
+                                 + "/"
+                                 + video_name
+                                 + "/"
+                                 + "Person"
+                                 + str(i + 1)):
+                        mkdir(directory
+                              + "/"
+                              + video_name
+                              + "/"
+                              + "Person"
+                              + str(i + 1))
                 person_no = 1
                 for bbox in person_boxes:
                     x, y, w, h = (
@@ -44,7 +54,8 @@ class GenerateFaceCrops:
                     )
                     img = frame[y: y + h, x: x + w]
                     cv2.imwrite(
-                        "FaceCrops/"
+                        directory
+                        + "/"
                         + video_name
                         + "/"
                         + "Person"
@@ -87,7 +98,8 @@ class GenerateFaceCrops:
                         x, y, w, h = newbox
                         img = frame[int(y): int(y + h), int(x): int(x + w)]
                         cv2.imwrite(
-                            "FaceCrops/"
+                            directory
+                            + "/"
                             + video_name
                             + "/"
                             + "Person"
@@ -105,4 +117,3 @@ class GenerateFaceCrops:
             except Exception as e:
                 print(e)
                 pass
-        cuda.close()
