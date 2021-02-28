@@ -13,7 +13,7 @@ from keras import (
 from keras_applications.resnext import ResNeXt101
 import time
 from efficientnet.keras import EfficientNetB6
-from faceCrops import GenerateFaceCrops
+from faceCrops import face_crops
 import argparse
 
 
@@ -232,8 +232,7 @@ class ResNext:
             frames (int): Variable representing the number of
                           frames to be selected from the videos.
         """
-        face_crop_object = GenerateFaceCrops(test_set_dir, frames)
-        face_crop_object.face_crops(test_set_dir+"/FaceCrops")
+        face_crops(test_set_dir, frames, test_set_dir+"/FaceCrops")
         return(self.__predict_images(test_set_dir+"/FaceCrops"))
 
 
@@ -418,8 +417,7 @@ class EfficientNetWithAttention:
             frames (int): Variable representing the number of
                           frames to be selected from the videos.
         """
-        face_crop_object = GenerateFaceCrops(test_set_dir, frames)
-        face_crop_object.face_crops(test_set_dir+"/FaceCrops")
+        face_crops(test_set_dir, frames, test_set_dir+"/FaceCrops")
         return(self.__predict_images(test_set_dir+"/FaceCrops"))
 
 
@@ -479,8 +477,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.genFaceCrops:
-        face_crop_object = GenerateFaceCrops(args.videoDirectory, args.frames)
-        face_crop_object.face_crops()
+        face_crops(args.videoDirectory, args.frames)
 
     elif args.trainResNext:
         resnext = ResNext()
