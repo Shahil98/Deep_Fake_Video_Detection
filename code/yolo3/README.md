@@ -1,0 +1,1 @@
+This code is taken from the repository [keras-yolo3](https://github.com/qqwweee/keras-yolo3) and updated to work with this project.
