@@ -4,7 +4,18 @@ from yolo import YOLO
 import cv2
 
 
-def face_crops(video_directory, sample_rate, directory="FaceCrops"):
+def face_crops(video_directory,
+               sample_rate,
+               directory="FaceCrops"):
+    """
+    This function is used to generate face crops of people from videos.
+
+    Args:
+        video_directory (str): Path to the directory for videos.
+        sample_rate (int): Number of frames to be considered
+                           for getting face crops in a video.
+        directory (str): Name of the folder where face crops will be stored. Defaults to "FaceCrops".
+    """
     try:
         mkdir(directory)
     except Exception as e:
