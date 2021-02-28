@@ -11,6 +11,10 @@ from PIL import Image
 
 
 class YOLO(object):
+    """
+    This class represents yolo and helps in loading the model
+    and generating boxes around people's faces in an image.
+    """
     _defaults = {
         "model_path": "model_data/yolo.h5",
         "anchors_path": "model_data/yolo_anchors.txt",
@@ -23,12 +27,25 @@ class YOLO(object):
 
     @classmethod
     def get_defaults(cls, n):
+        """
+        This function returns a required default value given key.
+        Args:
+            n ('str'): Key value to be used to
+                       retrieve from defaults dictionary.
+
+        Returns:
+            value: Returns corresponding value for the provided key.
+        """
         if n in cls._defaults:
             return cls._defaults[n]
         else:
             return "Unrecognized attribute name '" + n + "'"
 
     def load_models(self, **kwargs):
+        """
+        This function is used to load the
+        necessary things required for the yolo model.
+        """
         self.__dict__.update(self._defaults)
         self.__dict__.update(kwargs)
         self.class_names = self._get_class()
@@ -37,6 +54,13 @@ class YOLO(object):
         self.boxes, self.scores, self.classes = self.generate()
 
     def _get_class(self):
+        """
+        This function is used to get the class
+        names for which the yolo model will look for in the image.
+
+        Returns:
+            list[str]: A list of string representing different classes.
+        """
         classes_path = expanduser(self.classes_path)
         with open(classes_path) as f:
             class_names = f.readlines()
@@ -44,6 +68,12 @@ class YOLO(object):
         return class_names
 
     def _get_anchors(self):
+        """
+        This function is used to get the anchor dimensions.
+
+        Returns:
+            list[list[int]]: List having dimensions for each anchor.
+        """
         anchors_path = expanduser(self.anchors_path)
         with open(anchors_path) as f:
             anchors = f.readline()
@@ -115,6 +145,17 @@ class YOLO(object):
         return boxes, scores, classes
 
     def detect_image(self, image):
+        """
+        This function is used to get the boxes for each person in the images.
+
+        Args:
+            image (PIL.Image): A PIL Image object
+
+        Returns:
+            image (PIL.Image): A PIL Image object
+            list[list[int]]: A list describing the
+                             coordinates for each face in the image.
+        """
         if self.model_image_size != (None, None):
             assert self.model_image_size[0] % 32 == 0, (
                 "Multiples of 32 required")
@@ -162,9 +203,22 @@ class YOLO(object):
         return image, person_boxes
 
     def close_session(self):
+        """
+        This function is used to close the session.
+        """
         self.sess.close()
 
     def detect_video(self, frame):
+        """
+        This function is used to get face bounding boxes for a frame.
+
+        Args:
+            frame: Image read using opencv.
+
+        Returns:
+            list[list[int]]: A list describing the
+                             coordinates for each face in the image.
+        """
         image = Image.fromarray(frame)
         image, person_boxes = self.detect_image(image)
         return person_boxes
