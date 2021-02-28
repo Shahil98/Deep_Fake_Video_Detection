@@ -14,7 +14,8 @@ def face_crops(video_directory,
         video_directory (str): Path to the directory for videos.
         sample_rate (int): Number of frames to be considered
                            for getting face crops in a video.
-        directory (str): Name of the folder where face crops will be stored. Defaults to "FaceCrops".
+        directory (str): Name of the folder where face
+                         crops will be stored. Defaults to "FaceCrops".
     """
     try:
         mkdir(directory)
