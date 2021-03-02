@@ -1,12 +1,5 @@
 # DeepFake Detection
 
-Implementation for DeepFake Detection Using Ensembling Techniques
-
-![Alt Text](https://github.com/Shahil98/Deep_Fake_Video_Detection/blob/master/extra/arch.png)
-
-**Determining whether a given video is Real or Fake by cropping the face of a person and classifying the
-cropped image by an ensemble of 2 networks (ResNext and EfficientNetB6)**
-
 ## Installation
 
 1) Clone this repository.
@@ -64,3 +57,11 @@ optional arguments:
 
 ```
  
+## Methodology
+
+Implementation for DeepFake Detection Using Ensembling Techniques
+
+![Alt Text](https://github.com/Shahil98/Deep_Fake_Video_Detection/blob/master/extra/arch.png)
+
+**Determining whether a given video is Real or Fake by cropping the face of a person and classifying the
+cropped image by an ensemble of 2 models (ResNext and EfficientNetB6)**
