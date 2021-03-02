@@ -426,53 +426,74 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--genFaceCrops",
-                        action="store_true")
+                        action="store_true",
+                        help="""Will generate facecrops for videos
+                                inside videoDirectory.""")
 
     parser.add_argument("--frames",
                         nargs="?",
                         default=30,
-                        type=int)
+                        type=int, help="""Will set the number of frames to be considered
+                                          for each video. Defaults to 30.""")
 
     parser.add_argument("--videoDirectory",
                         nargs="?",
-                        default="test_videos")
+                        default="test_videos",
+                        help="""Will set the directory for videos whose facecrops
+                                are to be generated.
+                                Defaults to 'test_videos'""")
 
     parser.add_argument("--trainEfficientNet",
-                        action="store_true")
+                        action="store_true",
+                        help="Will train EfficientNet.")
     parser.add_argument("--trainResNext",
-                        action="store_true")
+                        action="store_true",
+                        help="Will train ResNeXt.")
 
     parser.add_argument("--epochs",
                         nargs="?",
                         default=200,
-                        type=int)
+                        type=int,
+                        help="""Will set the number of epochs for training.
+                                Defaults to 200.""")
 
     parser.add_argument("--batchSize",
                         nargs="?",
                         default=64,
-                        type=int)
+                        type=int,
+                        help="""Will set the batch size for training.
+                        Defaults to 64.""")
 
     parser.add_argument("--imageDirectory",
                         nargs="?",
-                        default="train_images")
+                        default="train_images",
+                        help="""Will set the directory for training set images.
+                                Defaults to 'train_images'""")
 
     parser.add_argument("--learningRate",
                         nargs="?",
                         default=0.0001,
-                        type=float)
+                        type=float,
+                        help="""Will set the learning rate for training.
+                                Defaults to 0.0001""")
 
     parser.add_argument("--trainableLayers",
                         nargs="?",
                         default=5,
-                        type=int)
+                        type=int,
+                        help="""Will set the number of trainable layers.
+                                Defaults to 5.""")
 
     parser.add_argument("--test",
-                        action="store_true")
+                        action="store_true",
+                        help="Test mode.")
 
     parser.add_argument("--testVideoDirectory",
                         nargs="?",
                         default="test",
-                        type=str)
+                        type=str,
+                        help="""Will set the directory for test videos.
+                                Defaults to 'test'""")
 
     args = parser.parse_args()
 
