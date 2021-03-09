@@ -10,6 +10,6 @@ install:
 
 script:
  - cd code
- - python main.py --genFaceCrops --frames 1 --videoDirectory
+ - python main.py --genFaceCrops --frames 1 --videoDirectory ../test/Videos
  - cd ..   
  - pytest --flake8 
