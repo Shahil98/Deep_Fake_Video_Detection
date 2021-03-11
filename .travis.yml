@@ -11,5 +11,6 @@ install:
 
 script:
  - cd code/model_data && gdown https://drive.google.com/uc?id=1PAdOJX1aMm-53bTdrCyUpFF_voZxQ4O_
- - cd code && python main.py --genFaceCrops --frames 1 --videoDirectory ../test/Videos
+ - ls
+ - python main.py --genFaceCrops --frames 1 --videoDirectory ../test/Videos
  - pytest --flake8 
