@@ -7,9 +7,12 @@ python:
 install:
  - pip install --upgrade pip
  - pip install -r requirements.txt
-
+ - pip install gdown
 script:
  - cd code
+ - cd model_data
+ - gdown https://drive.google.com/uc?id=1PAdOJX1aMm-53bTdrCyUpFF_voZxQ4O_
+ - cd ..
  - python main.py --genFaceCrops --frames 1 --videoDirectory ../test/Videos
  - cd ..   
  - pytest --flake8 
